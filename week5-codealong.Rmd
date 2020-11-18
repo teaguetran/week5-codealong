@@ -7,5 +7,75 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(palmerpenguins)
+library(effsize)
+library(broom)
+library(ggbeeswarm)
+library(car)
 ```
+
+# Part 1. T-tests
+
+mass comparison: male & female chinstrap penguins
+
+```{r}
+chinstraps <- penguins %>% 
+  filter(species == "Chinstrap")
+
+# Histograms
+ggplot(data = chinstraps, aes(x = body_mass_g)) + 
+  geom_histogram(bins = 10) + 
+  facet_wrap(~sex)
+#QQ plot
+ggplot(data = chinstraps, aes(sample = body_mass_g)) + 
+      geom_qq() + 
+      facet_wrap(~sex)
+
+# get descriptive statistics
+chinstraps %>% 
+  group_by(sex) %>% 
+  summarize(
+    mean_mass = mean(body_mass_g),
+    median_mass = median(body_mass_g),
+    sd_mass = sd(body_mass_g),
+    sample_size = n()
+  )
+
+```
+
+
+Get vectors of body_mass_g for female and male chinstrap penguins separately
+
+```{r}
+chinstraps_f <- chinstraps %>% 
+  filter(sex == "female") %>% 
+  pull(body_mass_g)
+
+chinstraps_m <- chinstraps %>% 
+  filter(sex == "male") %>% 
+  pull(body_mass_g)
+```
+
+### T-tests, a couple of different ways
+
+1. Is there a significant difference in body mass between male and female chinstrap penguins?
+
+```{r}
+chinstrap_ttest <- t.test(chinstraps_f, chinstraps_m)
+chinstrap_ttest
+
+
+cohen.d(chinstraps_f, chinstraps_m)
+```
+
+Are male chinstrap penguins significantly larger (body mass) than female chinstrap penguins?
+
+```{r}
+t.test(chinstraps_m, chinstraps_f, alternative = "greater")
+```
+
+
+
+
 
